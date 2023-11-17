@@ -453,8 +453,12 @@ VALUES
 
 ## ER Daigram
 
+![newwwww](https://github.com/PrinsPardhi/Assignment/assets/73771547/5a076e3c-ca3d-414a-be6c-49b1fa463d33)
 
 
-![555](https://github.com/PrinsPardhi/Assignment/assets/73771547/07d451b7-0f81-4e60-ad99-f90a34146ae2)
+### Set B
+1.	Show schedule of all trips including main driver information for 10th October this year.
+
+![Screenshot 2023-11-17 125107](https://github.com/PrinsPardhi/Assignment/assets/73771547/4089fa2e-4036-495c-9acc-f58405c2899c)
 
 
