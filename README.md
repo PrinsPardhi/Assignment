@@ -9,7 +9,7 @@ Rhutuj Sasane (22112011)
 ## Part 1
 Part 1 of assignment, we will need to identify data requirements, perform normalization (up to 3NF), create MySQL tables, and insert sample data. Here's a step-by-step solution.
 
-#### Step 1: Identify Data Requirements
+## Step 1: Identify Data Requirements
 
 Based on the provided information, we can identify the following entities:
 
