@@ -32,7 +32,7 @@ Based on the provided information, we can identify the following entities:
 #### # Maintenance
 
 
-## Part 2
+## Step 2
 Normalize the Data (Up to 3NF)
 
 We need to ensure that the data is in 1NF, 2NF, and 3NF:
@@ -139,7 +139,7 @@ The normalization process has resulted in a well-structured database with tables
 
 
 
-## Part 3
+## Step 3
 
 ### Create MySQL Tables :
 
@@ -255,7 +255,7 @@ CREATE TABLE Roster (
 CREATE INDEX idx_date ON Roster (Date);
 
 
-## Part 4
+## Step 4
 
 
 INSERT INTO Train (TrainID, TrainName) VALUES
@@ -454,6 +454,8 @@ VALUES
 ## ER Daigram
 
 ![newwwww](https://github.com/PrinsPardhi/Assignment/assets/73771547/5a076e3c-ca3d-414a-be6c-49b1fa463d33)
+
+## Part 2
 
 
 ### Set B (Prins Pardhi)
