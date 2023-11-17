@@ -456,7 +456,7 @@ VALUES
 ![newwwww](https://github.com/PrinsPardhi/Assignment/assets/73771547/5a076e3c-ca3d-414a-be6c-49b1fa463d33)
 
 
-### Set B
+### Set B (Prins Pardhi)
 1.	Show schedule of all trips including main driver information for 10th October this year.
 
 ![Screenshot 2023-11-17 125107](https://github.com/PrinsPardhi/Assignment/assets/73771547/4089fa2e-4036-495c-9acc-f58405c2899c)
