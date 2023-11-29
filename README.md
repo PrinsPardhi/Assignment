@@ -13,23 +13,22 @@ Part 1 of assignment, we will need to identify data requirements, perform normal
 
 Based on the provided information, we can identify the following entities:
 
-#### # Train
+#### # CITY
+#### # STATION
+#### # TRAIN
+#### # INTERMEIDATE STATION
+#### # DRIVER
+#### # MAINTENANCE SCHEDULE
+#### # STAND BY TRAIN
+#### # PASSENGER
+#### # TRAVEL AGENT
+#### # BOOKING
+#### # SERVICE DAY
+#### # TRAIN SERVICE DAY
+#### # ROUTE
+#### # SCHEDULE
+#### # DRIVER ASSIGNMENT
 
-#### # Route
-
-#### # Schedule
-
-#### # Staff (Driver, Co-Driver)
-
-#### # Coach
-
-#### # Booking
-
-#### # TravelAgent
-
-#### # Passenger
-
-#### # Maintenance
 
 
 ## Step 2
@@ -40,102 +39,10 @@ We need to ensure that the data is in 1NF, 2NF, and 3NF:
 2NF: Remove partial dependencies, meaning that non-prime attributes are dependent on the entire primary key.
 3NF: Remove transitive dependencies, meaning that non-prime attributes should not depend on other non-prime attributes.
 
-### Entity Relationships::
-
-#### A Train has multiple Coaches.
-
-#### A Train operates on a Route.
-
-#### A Route has a Schedule.
-
-#### Staff (Driver, Co-Driver) is associated with a Train on a given Schedule.
-
-#### Each Coach has a Schedule.
-
-#### Bookings are made for a particular Route on a specific Schedule.
-
-#### Travel Agents handle Bookings.
-
-#### Passengers are associated with Bookings.
-
-#### Maintenance is related to Coaches.
+### Entity Relationships Diagram::
 
 
-The InterCity Express Trains (IET) database is designed to support day-to-day operations, route management, and decision-making processes. The normalization process ensures data integrity, reduces redundancy, and improves overall database efficiency.
-
-### Entities::
-
-Train:
-TrainID (Primary Key),
-TrainName
-
-Route:
-RouteID (Primary Key),
-RouteName,
-Distance,
-TimeTaken,
-OperatingDays
-
-Schedule:
-ScheduleID (Primary Key),
-DepartureTime,
-ArrivalTime,
-TrainID (Foreign Key referencing Train.TrainID),
-RouteID (Foreign Key referencing Route.RouteID)
-
-Staff:
-StaffID (Primary Key),
-StaffType,
-StaffName,
-ContactNumber,
-CityOfResidence
-
-Coach:
-CoachID (Primary Key),
-CoachNumber,
-Mileage,
-LastMaintenanceDate
-
-Booking:
-BookingID (Primary Key),
-BookingDate,
-ConcessionType,
-ScheduleID (Foreign Key referencing Schedule.ScheduleID),
-TravelAgentID (Foreign Key referencing TravelAgent.TravelAgentID),
-PassengerID (Foreign Key referencing Passenger.PassengerID)
-
-TravelAgent:
-TravelAgentID (Primary Key),
-AgentName,
-CommissionRate
-
-Passenger:
-PassengerID (Primary Key),
-PassengerName,
-Age
-
-Maintenance:
-MaintenanceID (Primary Key),
-MaintenanceType,
-ScheduleDate,
-CoachID (Foreign Key referencing Coach.CoachID)
-
-
-### Normalization Steps:
-#### 1. First Normal Form (1NF):
-All tables have atomic values in each cell, ensuring there are no repeating groups or arrays.
-
-#### 2. Second Normal Form (2NF):
-No changes were needed for 2NF, as all non-prime attributes are fully functionally dependent on the primary key.
-
-#### 3. Third Normal Form (3NF):
-Schedule Table:
-Removed redundant attributes (TrainID, RouteID) to create a new table (TrainRoute).TrainRoute (TrainID, RouteID) establishes a relationship between Train and Route.
-
-Booking Table:
-Removed redundant attributes (ScheduleID) to create a new table (ScheduleBooking).ScheduleBooking (ScheduleID, BookingID) establishes a relationship between Schedule and Booking.
-
-The normalization process has resulted in a well-structured database with tables in 3NF, ensuring data consistency and minimizing redundancy. The relationships between entities have been established through foreign key references, facilitating efficient data retrieval and management.
+![er](https://github.com/PrinsPardhi/Assignment/assets/73771547/2e9d88f7-e25d-4c55-9c30-8c4540609b37)
 
 
 
@@ -143,324 +50,402 @@ The normalization process has resulted in a well-structured database with tables
 
 ### Create MySQL Tables :
 
--- Create Train Table
+-- 1 City Table
+CREATE TABLE City (
+    CityID INT PRIMARY KEY,
+    CityName VARCHAR(255)
+);
 
+-- 2 Station Table
+CREATE TABLE Station (
+    StationID INT PRIMARY KEY,
+    StationName VARCHAR(255),
+    CityID INT,
+    FOREIGN KEY (CityID) REFERENCES City(CityID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 3 Train Table
 CREATE TABLE Train (
     TrainID INT PRIMARY KEY,
-    TrainName VARCHAR(255)
-    );
-
--- Create Route Table
-
-CREATE TABLE Route (
-    RouteID INT PRIMARY KEY,
-    RouteName VARCHAR(255),
+    TrainName VARCHAR(255),
+    Facilities VARCHAR(255),
+    OperatingDays VARCHAR(255),
+    TotalCoaches INT,
     Distance INT,
-    TimeTaken VARCHAR(20),
-    OperatingDays VARCHAR(20)
-    );
+    CONSTRAINT UC_Train UNIQUE (TrainName) -- Added a unique constraint for TrainName
+);
 
--- Create Schedule Table
-
-CREATE TABLE Schedule (
-    ScheduleID INT PRIMARY KEY,
+--  4 IntermediateStation Table
+CREATE TABLE IntermediateStation (
+    IntermediateStationID INT PRIMARY KEY,
+    StationID INT,
+    TrainID INT,
+    ArrivalTime TIME,
     DepartureTime TIME,
-    ArrivalTime TIME
-    );
+    FOREIGN KEY (StationID) REFERENCES Station(StationID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
--- Create Staff Table
-
-CREATE TABLE Staff (
-    StaffID VARCHAR(10) PRIMARY KEY,
-    StaffType VARCHAR(20),
-    StaffName VARCHAR(255),
+-- 5 Driver Table
+CREATE TABLE Driver (
+    DriverID VARCHAR(10) PRIMARY KEY,
+    FirstName VARCHAR(255),
+    LastName VARCHAR(255),
     ContactNumber VARCHAR(15),
-    CityOfResidence VARCHAR(255)
-    );
+    CityID INT,
+    RestDay VARCHAR(255),
+    AccommodationRequired BOOLEAN,
+    FOREIGN KEY (CityID) REFERENCES City(CityID) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
--- Create Coach Table
-
-CREATE TABLE Coach (
-    CoachID INT PRIMARY KEY,
-    CoachNumber VARCHAR(20),
+-- 6 MaintenanceSchedule Table
+CREATE TABLE MaintenanceSchedule (
+    MaintenanceID INT PRIMARY KEY,
+    TrainID INT,
+    LastMaintenanceDate DATE,
     Mileage INT,
-    LastMaintenanceDate DATE
+    MaintenanceType VARCHAR(50),
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Create Booking Table
-
-CREATE TABLE Booking (
-    BookingID INT PRIMARY KEY,
-    ScheduleID INT,
-    TravelAgentID INT,
-    PassengerID INT,
-    BookingDate DATE,
-    ConcessionID INT, 
-    FOREIGN KEY (ScheduleID) REFERENCES Schedule(ScheduleID),
-    FOREIGN KEY (TravelAgentID) REFERENCES TravelAgent(TravelAgentID),
-    FOREIGN KEY (PassengerID) REFERENCES Passenger(PassengerID),
-    FOREIGN KEY (ConcessionID) REFERENCES Concession(ConcessionID)
+-- 7 StandByTrain Table
+CREATE TABLE StandByTrain (
+    StandByTrainID INT PRIMARY KEY,
+    TrainID INT,
+    DriverID VARCHAR(10),
+    ActivationTime DATETIME,
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (DriverID) REFERENCES Driver(DriverID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Create TravelAgent Table
+-- 8 Passenger Table
+CREATE TABLE Passenger (
+    PassengerID INT PRIMARY KEY,
+    FirstName VARCHAR(255),
+    LastName VARCHAR(255),
+    Age INT,
+    ConcessionType VARCHAR(20)
+);
 
+-- 9 TravelAgent Table
 CREATE TABLE TravelAgent (
     TravelAgentID INT PRIMARY KEY,
     AgentName VARCHAR(255),
     CommissionRate DECIMAL(5, 2)
 );
 
--- Create Passenger Table
-
-CREATE TABLE Passenger (
-    PassengerID INT PRIMARY KEY,
-    PassengerName VARCHAR(255),
-    Age INT
+-- 10 Booking Table
+CREATE TABLE Booking (
+    BookingID INT PRIMARY KEY,
+    PassengerID INT,
+    TrainID INT,
+    BookingDate DATE,
+    TravelAgentID INT,
+    TravelDate DATE,
+    SeatNumber INT,
+    Amount DECIMAL(10, 2),
+    FOREIGN KEY (PassengerID) REFERENCES Passenger(PassengerID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (TravelAgentID) REFERENCES TravelAgent(TravelAgentID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Create Concession Table 
-
-CREATE TABLE Concession (
-    ConcessionID INT PRIMARY KEY,
-    ConcessionType VARCHAR(10) UNIQUE,
-    DiscountRate DECIMAL(5, 2)
+-- 11 ServiceDays Table
+CREATE TABLE ServiceDays (
+    ServiceDayID INT PRIMARY KEY,
+    Day VARCHAR(255)
 );
 
--- Create Maintenance Table
-
-CREATE TABLE Maintenance (
-    MaintenanceID INT PRIMARY KEY,
-    CoachID INT,
-    MaintenanceType VARCHAR(50),
-    ScheduleDate DATE
+-- 12 TrainServiceDays Table
+CREATE TABLE TrainServiceDays (
+    TrainID INT,
+    ServiceDayID INT,
+    PRIMARY KEY (TrainID, ServiceDayID),
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ServiceDayID) REFERENCES ServiceDays(ServiceDayID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- 13 Route Table
+CREATE TABLE Route (
+    RouteID INT PRIMARY KEY,
+    StartStationID INT,
+    EndStationID INT,
+    Distance INT,
+    TimeTaken VARCHAR(255),
+    FOREIGN KEY (StartStationID) REFERENCES Station(StationID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (EndStationID) REFERENCES Station(StationID) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
-CREATE TABLE Roster (
-    RosterID INT AUTO_INCREMENT PRIMARY KEY,
-    StaffID VARCHAR(10) NOT NULL,
-    Date DATE NOT NULL,
-    Time TIME NOT NULL,
-    Route VARCHAR(255) NOT NULL,
+-- 14 Schedule Table
+CREATE TABLE Schedule (
+    ScheduleID INT PRIMARY KEY,
+    TrainID INT,
+    RouteID INT,
+    DepartureTime TIME,
+    OperatingDays VARCHAR(255),
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (RouteID) REFERENCES Route(RouteID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- 15 DriverAssignment Table
+CREATE TABLE DriverAssignment (
+    DriverID VARCHAR(10),
+    ScheduleID INT,
+    MainDriver BOOLEAN,
+    CoDriver BOOLEAN,
     Remark VARCHAR(255),
-    CONSTRAINT fk_staff
-        FOREIGN KEY (StaffID)
-        REFERENCES Staff(StaffID)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
+    PRIMARY KEY (DriverID, ScheduleID),
+    FOREIGN KEY (DriverID) REFERENCES Driver(DriverID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ScheduleID) REFERENCES Schedule(ScheduleID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Assuming you may need an index on the Date column for better query performance
+--16 CREATE TABLE LateArrivals ( 
+  LateArrivalID INT AUTO_INCREMENT PRIMARY KEY,
+    TrainID INT,
+    ArrivalTime DATETIME,
+    ScheduledArrivalTime DATETIME,
+    DelayMinutes INT,
+    LateReason VARCHAR(255),
+    LateDate DATE,
+    FOREIGN KEY (TrainID) REFERENCES Train(TrainID) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
-CREATE INDEX idx_date ON Roster (Date);
+
 
 
 ## Step 4
 
+### Insert Values Into Tables :
 
-INSERT INTO Train (TrainID, TrainName) VALUES
-    (1, 'Mumbai Central - Gandhinagar'),
-    (2, 'New Delhi - Himachal'),
-    (3, 'Secunderabad - Visakhapatnam'),
-    (4, 'Mumbai - Sainagar Shirdi'),
-    (5, 'Mumbai - Solapur'),
-    (6, 'Bhopal - Delhi'),
-    (7, 'Lonavala - Ajmer'),
-    (8, 'Dharwad - Bengaluru'),
-    (9, 'Bhopal - Indore'),
-    (10, 'Mumbai - Goa');
+-- City Table 
+INSERT INTO City (CityID, CityName) 
+VALUES (1, 'Mumbai'), (2, 'New Delhi'), (3, 'Secunderabad'), (4, 'Bhopal'), (5, 'Lonavala'), (6, 'Dharwad'), (7, 'Pune'), (8, 'Ajmer'), (9, 'Delhi'), (10, 'Chennai');
 
+-- Station Table 
+INSERT INTO Station (StationID, StationName, CityID) 
+VALUES (1, 'Mumbai Central', 1), (2, 'Gandhinagar', 1), (3, 'New Delhi', 2), (4, 'Himachal', 2), (5, 'Secunderabad', 3), (6, 'Visakhapatnam', 3), (7, 'Sainagar Shirdi', 1), (8, 'Solapur', 1), (9, 'Bhopal', 4), (10, 'Delhi', 2);
 
-   INSERT INTO Route (RouteID, RouteName, Distance, TimeTaken, OperatingDays) VALUES
-    (1, 'Mumbai Central - Gandhinagar', 548, '5 hours 40 minutes', '6 days a week except Sundays'),
-    (2, 'New Delhi - Himachal', 412, '6 hours 10 minutes', '6 days a week except Thursdays'),
-    (3, 'Secunderabad - Visakhapatnam', 500, '8 hours 30 minutes', 'Once a week (every Sunday)'),
-    (4, 'Mumbai - Sainagar Shirdi', 248, '5 hours 20 minutes', '6 days a week except Tuesdays'),
-    (5, 'Mumbai - Solapur', 400, '6 hours and 35 minutes', '6 days a week except Wednesdays'),
-    (6, 'Bhopal - Delhi', 700, '7 hours and 45 minutes', '6 days a week except Saturdays'),
-    (7, 'Lonavala - Ajmer', 1062, '10 hours 45 minutes', 'Once a week (every Saturday)'),
-    (8, 'Dharwad - Bengaluru', 432, '5 hours', 'Monday, Wednesday, and Saturday'),
-    (9, 'Bhopal - Indore', 246, '3 hours', 'Every day'),
-    (10, 'Mumbai - Goa', 588, '6 hours', 'Every day');
+-- IntermediateStation Table
+ INSERT INTO IntermediateStation (IntermediateStationID, StationID, TrainID, ArrivalTime, DepartureTime) 
+VALUES (1, 1, 1, '05:45:00', '12:10:00'), (2, 2, 1, '13:15:00', '19:45:00'), (3, 3, 2, '09:00:00', '15:10:00'), (4, 4, 2, '16:10:00', '22:20:00'), (5, 5, 3, '08:30:00', NULL), (6, 6, 3, '17:00:00', NULL), (7, 7, 4, '05:20:00', '10:40:00'), (8, 8, 4, '06:35:00', '13:00:00'), (9, 9, 5, '07:45:00', '15:30:00'), (10, 10, 5, '08:00:00', '16:00:00');
 
-INSERT INTO Roster (StaffID, Date, Time, Route, Remark) VALUES
-    ('K0012', '2023-10-07', '06:00:00', 'Mumbai - Goa', 'Main Driver'),
-    ('K0012', '2023-10-07', '13:00:00', 'Goa - Mumbai', 'Co-Driver'),
-    ('K0012', '2023-10-08', '09:00:00', 'Mumbai - Goa', 'Main Driver'),
-    ('K0012', '2023-10-08', '16:00:00', 'Goa - Mumbai', 'Main Driver'),
-    ('K0012', '2023-10-09', '09:00:00', 'Mumbai - Goa', 'Co-Driver'),
-    ('K0012', '2023-10-09', '16:00:00', 'Goa - Mumbai', 'Main Driver'),
-    ('K0012', '2023-10-10', '06:00:00', 'Lonavala - Ajmer', 'Co-Driver'),
-    ('K0012', '2023-10-10', '17:00:00', 'Ajmer - Lonavala', 'Main Driver');
-    ('K0012', '2023-10-11', '00:00:00', 'OFF', 'OFF'),
-    ('K0012', '2023-10-12', '06:00:00', 'Mumbai - Goa', 'Main Driver'),
-    ('K0012', '2023-10-12', '13:00:00', 'Goa - Mumbai', 'Co-Driver'),
-    ('K0012', '2023-10-13', '09:00:00', 'Mumbai - Goa', 'Main Driver'),
-    ('K0012', '2023-10-13', '16:00:00', 'Goa - Mumbai', 'Main Driver');
+-- Driver Table 
+INSERT INTO Driver (DriverID, FirstName, LastName, ContactNumber, CityID, RestDay, AccommodationRequired) 
+VALUES ('K0012', 'Ketan', 'Vibhuti', '9812131415', 7, 'Sunday', TRUE), ('S0023', 'Sneha', 'Gupta', '9876543210', 4, 'Saturday', FALSE), ('R0034', 'Rajesh', 'Kumar', '9998887776', 1, 'Thursday', TRUE), ('P0045', 'Prerna', 'Singh', '8765432109', 6, 'Wednesday', FALSE), ('A0056', 'Alok', 'Yadav', '8887776665', 3, 'Monday', TRUE), ('N0067', 'Nisha', 'Sharma', '8765432101', 9, 'Friday', FALSE), ('M0078', 'Manoj', 'Verma', '9876543211', 10, 'Tuesday', TRUE), ('V0089', 'Vikas', 'Goyal', '9812345678', 5, 'Sunday', FALSE), ('G0090', 'Gauri', 'Gupta', '9999999999', 2, 'Saturday', TRUE), ('L0101', 'Lalit', 'Mishra', '7777777777', 8, 'Tuesday', FALSE);
 
+-- MaintenanceSchedule Table 
+INSERT INTO MaintenanceSchedule (MaintenanceID, TrainID, LastMaintenanceDate, Mileage, MaintenanceType) 
+VALUES (1, 1, '2023-11-01', 5500, 'Routine'), (2, 2, '2023-10-15', 4000, 'Routine'), (3, 3, '2023-10-20', 3000, 'Routine'), (4, 4, '2023-11-05', 6000, 'Routine'), (5, 5, '2023-10-10', 5500, 'Routine'), (6, 6, '2023-10-25', 4500, 'Routine'), (7, 7, '2023-11-10', 9000, 'Routine'), (8, 8, '2023-10-30', 3500, 'Routine'), (9, 9, '2023-11-15', 2000, 'Routine'), (10, 10, '2023-11-20', 7000, 'Routine');
 
+-- StandByTrain Table 
+INSERT INTO StandByTrain (StandByTrainID, TrainID, DriverID, ActivationTime)
+ VALUES (1, 1, 'K0012', '2023-11-01 05:30:00'), (2, 2, 'S0023', '2023-10-15 08:45:00'), (3, 3, 'R0034', '2023-10-20 07:45:00'), (4, 4, 'P0045', '2023-11-05 15:45:00'), (5, 5, 'A0056', '2023-10-10 06:30:00'), (6, 6, 'N0067', '2023-10-25 16:00:00'), (7, 7, 'M0078', '2023-11-10 10:30:00'), (8, 8, 'V0089', '2023-10-30 04:30:00'), (9, 9, 'G0090', '2023-11-15 08:15:00'), (10, 10, 'L0101', '2023-11-20 05:45:00');
+ --Passenger Table
+INSERT INTO Passenger (PassengerID, FirstName, LastName, Age, ConcessionType) 
 
--- Inserting new routes
+VALUES (1, 'Amit', 'Sharma', 30, 'None'), (2, 'Priya', 'Patel', 25, 'Child'), (3, 'Raj', 'Kumar', 45, 'Senior'), (4, 'Anjali', 'Desai', 22, 'None'), (5, 'Suresh', 'Verma', 60, 'Senior'),(6, 'Aisha', 'Singh', 18, 'None'), (7, 'Vikram', 'Yadav', 35, 'None'), (8, 'Pooja', 'Gupta', 28, 'None'), (9, 'Ravi', 'Chopra', 50, 'Senior'), (10, 'Neha', 'Reddy', 40, 'None');
 
-INSERT INTO Route (RouteID, RouteName, Distance, TimeTaken, OperatingDays, IntermediateStations, ArrivalTimes, DepartureTimes)
-VALUES
-    (11, 'Chennai - Bengaluru', 350, '4 hours', 'Every day', 'Station1, Station2', '6:00 am, 8:00 am', '7:45 pm, 9:45 pm'),
-    (12, 'Delhi - Pune', 1200, '16 hours', 'Every day', 'StationA, StationB, StationC', '8:00 am, 2:00 pm, 6:00 pm', '12:00 am, 6:00 am, 10:00 am');
+--TravelAgent Table
 
--- Inserting new schedules
+ INSERT INTO TravelAgent (TravelAgentID, AgentName, CommissionRate)
 
-INSERT INTO Schedule (ScheduleID, DepartureTime, ArrivalTime, StartStation, EndStation, IntermediateStations)
-VALUES
-    (11, '5:45 am', '12:10 pm', 'KSR Bengaluru', 'Dharwad', 'Station1, Station2'),
-    (12, '1:15 pm', '7:45 pm', 'Dharwad', 'KSR Bengaluru', 'Station2, Station1');
+ VALUES (1, 'TravelHub', 10.00), (2, 'GlobalTours', 12.50), (3, 'EpicTravels', 8.00), (4, 'CityExplorers', 15.00), (5, 'StarVoyages', 10.50), (6, 'SunshineHolidays', 11.00), (7, 'DreamJourneys', 9.50), (8, 'AdventureQuest', 14.00), (9, 'VacationPalace', 12.00), (10, 'JourneyMasters', 13.00);
+-- Booking Table 
 
--- Inserting coach information for the new routes
+INSERT INTO Booking (BookingID, PassengerID, TrainID, BookingDate, TravelAgentID, TravelDate, SeatNumber, Amount)
 
-INSERT INTO Coach (CoachID, CoachNumber, Mileage, LastMaintenanceDate, StandbyActivated, RouteID)
-VALUES
-    (101, 'C101', 6000, '2023-10-01', FALSE, 11),
-    (102, 'C102', 4500, '2023-05-15', FALSE, 11),
-    (103, 'C103', 8000, '2023-08-20', FALSE, 12),
-    (104, 'C104', 3000, '2023-02-10', FALSE, 12);
+ VALUES (1, 1, 1, '2023-11-01', 1, '2023-11-15', 101, 120.00), (2, 2, 2, '2023-10-15', 2, '2023-10-30', 201, 150.00), (3, 3, 3, '2023-10-20', 3, '2023-11-05', 301, 180.00), (4, 4, 4, '2023-11-05', 4, '2023-11-20', 401, 200.00), (5, 5, 5, '2023-10-10', 5, '2023-10-25', 501, 220.00), (6, 6, 6, '2023-10-25', 6, '2023-11-10', 601, 250.00), (7, 7, 7, '2023-11-10', 7, '2023-10-30', 701, 180.00), (8, 8, 8, '2023-10-30', 8, '2023-11-15', 801, 200.00), (9, 9, 9, '2023-11-15', 9, '2023-11-01', 901, 210.00), (10, 10, 10, '2023-11-20', 10, '2023-11-13', 1001, 230.00);
 
+--Serviceday Table
 
+INSERT INTO ServiceDays (ServiceDayID, Day)
 
-## Modified Tables:
-Route Table:
+ VALUES (1, 'Monday'), (2, 'Tuesday'), (3, 'Wednesday'), (4, 'Thursday'), (5, 'Friday'), (6, 'Saturday'),
+(7, 'Sunday');
 
-Add columns for intermediate stations, arrival, and departure times.
+-- TrainServiceDays Table 
 
-ALTER TABLE Route
-ADD COLUMN IntermediateStations TEXT,
-ADD COLUMN ArrivalTimes TEXT,
-ADD COLUMN DepartureTimes TEXT;
+INSERT INTO TrainServiceDays (TrainID, ServiceDayID) 
 
-Schedule Table:
+VALUES (1, 1), (1, 2),(1, 3), (2, 4), (2, 5), (3, 6), (4, 7), (5, 1), (5, 2), (5, 3), (6, 4), (6, 5), (7, 6), (8, 7), (9, 1), (9, 2), (9, 3), (10, 4), (10, 5), (10, 6);
 
-Modify the table to include details about the start and end stations, and intermediate stations for each train.
+-- Route Table
 
-ALTER TABLE Schedule
-ADD COLUMN StartStation VARCHAR(255),
-ADD COLUMN EndStation VARCHAR(255),
-ADD COLUMN IntermediateStations TEXT;
+ INSERT INTO Route (RouteID, StartStationID, EndStationID, Distance, TimeTaken)
 
-Coach Table:
+ VALUES (1, 1, 2, 548, '5 hours 40 minutes'), (2, 3, 4, 412, '6 hours 10 minutes'), (3, 5, 6, 500, '8 hours 30 minutes'), (4, 7, 8, 248, '5 hours 20 minutes'), (5, 1, 8, 400, '6 hours 35 minutes'), (6, 9, 10, 588, '6 hours'), (7, 2, 7, 1062, '10 hours 45 minutes'), (8, 4, 5, 700, '7 hours 45 minutes'), (9, 10, 1, 432, '5 hours'), (10, 6, 9, 246, '3 hours');
 
-Add columns for mileage, last maintenance date, and a flag indicating whether a standby coach is activated.
+-- Schedule Table
 
-ALTER TABLE Coach
-ADD COLUMN Mileage INT,
-ADD COLUMN LastMaintenanceDate DATE,
-ADD COLUMN StandbyActivated BOOLEAN,
-ADD COLUMN RouteID INT,
-ADD FOREIGN KEY (RouteID) REFERENCES Route(RouteID);
+INSERT INTO Schedule (ScheduleID, TrainID, RouteID, DepartureTime, OperatingDays)
 
-## New Tables:
+ VALUES (1, 1, 1, '05:45:00', 'Mon,Tue,Wed,Thu,Fri'), (2, 1, 1, '13:15:00', 'Sat,Sun'), (3, 2, 2, '09:00:00', 'Mon,Wed,Fri,Sat'), (4, 2, 2, '16:10:00', 'Sun,Tue'), (5, 3, 3, '08:30:00', 'Sun'), (6, 3, 3, '17:00:00', 'Mon'), (7, 4, 4, '05:20:00', 'Mon,Thu,Fri,Sat,Sun'), (8, 4, 4, '06:35:00', 'Tue'), (9, 5, 5, '07:45:00', 'Mon,Thu,Fri,Sat,Sun'), (10, 5, 5, '08:00:00', 'Tue,Wed,Sat,Sun');
 
-Driver Table:
+-- DriverAssignment Table
 
-Create a table to store information about drivers, including their contact information and rest day.
+ INSERT INTO DriverAssignment (DriverID, ScheduleID, MainDriver, CoDriver, Remark)
 
-CREATE TABLE Driver (
-    DriverID INT PRIMARY KEY,
-    DriverName VARCHAR(255),
-    ContactNumber VARCHAR(15),
-    RestDay VARCHAR(10)
-);
+ VALUES ('K0012', 1, TRUE, FALSE, 'Main Driver'), ('K0012', 2, FALSE, TRUE, 'Co-Driver'), ('S0023', 3, TRUE, FALSE, 'Main Driver'), ('S0023', 4, TRUE, FALSE, 'Main Driver'), ('R0034', 5, FALSE, TRUE, 'Co-Driver'), ('R0034', 6, TRUE, FALSE, 'Main Driver'), ('P0045', 7, FALSE, TRUE, 'Co-Driver'), ('P0045', 8, TRUE, FALSE, 'Main Driver'), ('A0056', 9, TRUE, FALSE, 'Main Driver'), ('A0056', 10, FALSE, TRUE, 'Co-Driver');
 
-RouteDriver Table:
+--LateArrivals Table
 
-Create a table to associate drivers with routes.
+INSERT INTO LateArrivals (LateArrivalID, TrainID, ArrivalTime, ScheduledArrivalTime, DelayMinutes, LateReason, LateDate)
 
-CREATE TABLE RouteDriver (
-    RouteID INT,
-    DriverID INT,
-    PRIMARY KEY (RouteID, DriverID),
-    FOREIGN KEY (RouteID) REFERENCES Route(RouteID),
-    FOREIGN KEY (DriverID) REFERENCES Driver(DriverID)
-);
+VALUES  (1, 1, '2023-11-30 08:15:00', '2023-11-30 08:00:00', 15, 'Signal Issue', '2023-11-30');
 
-Accommodation Table:
-
-Create a table to manage accommodation details for drivers.
-
-CREATE TABLE Accommodation (
-    DriverID INT PRIMARY KEY,
-    AccommodationDetails TEXT,
-    FOREIGN KEY (DriverID) REFERENCES Driver(DriverID)
-);
-
-MaintenanceSchedule Table:
-
-Create a table to schedule routine maintenance for coaches.
-
-CREATE TABLE MaintenanceSchedule (
-    CoachID INT,
-    MaintenanceType VARCHAR(50),
-    ScheduleDate DATE,
-    PRIMARY KEY (CoachID, MaintenanceType),
-    FOREIGN KEY (CoachID) REFERENCES Coach(CoachID)
-);
-
-Concession Table (modified):
-
-Add a new column to store the age limit for concession eligibility.
-
-ALTER TABLE Concession
-ADD COLUMN AgeLimit INT;
-
-Booking Table (modified):
-
-Add a column to track whether the booking is made by a travel agent or the general public.
-
-ALTER TABLE Booking
-ADD COLUMN BookingType VARCHAR(20);
-
-Passenger Information Table:
-
-Create a table to store personalized passenger information.
-
-CREATE TABLE PassengerInfo (
-    PassengerID INT PRIMARY KEY,
-    PassengerName VARCHAR(255),
-    Age INT,
-    ContactNumber VARCHAR(15),
-    Email VARCHAR(255)
-);
-
-
-
-#### -- Inserting new routes
-INSERT INTO Route (RouteID, RouteName, Distance, TimeTaken, OperatingDays, IntermediateStations, ArrivalTimes, DepartureTimes)
-VALUES
-    (11, 'Chennai - Bengaluru', 350, '4 hours', 'Every day', 'Station1, Station2', '6:00 am, 8:00 am', '7:45 pm, 9:45 pm'),
-    (12, 'Delhi - Pune', 1200, '16 hours', 'Every day', 'StationA, StationB, StationC', '8:00 am, 2:00 pm, 6:00 pm', '12:00 am, 6:00 am, 10:00 am');
-
-#### -- Inserting new schedules
-INSERT INTO Schedule (ScheduleID, DepartureTime, ArrivalTime, StartStation, EndStation, IntermediateStations)
-VALUES
-    (11, '5:45 am', '12:10 pm', 'KSR Bengaluru', 'Dharwad', 'Station1, Station2'),
-    (12, '1:15 pm', '7:45 pm', 'Dharwad', 'KSR Bengaluru', 'Station2, Station1');
-
-#### -- Inserting coach information for the new routes
-INSERT INTO Coach (CoachID, CoachNumber, Mileage, LastMaintenanceDate, StandbyActivated, RouteID)
-VALUES
-    (101, 'C101', 6000, '2023-10-01', FALSE, 11),
-    (102, 'C102', 4500, '2023-05-15', FALSE, 11),
-    (103, 'C103', 8000, '2023-08-20', FALSE, 12),
-    (104, 'C104', 3000, '2023-02-10', FALSE, 12);
-
-
-## ER Daigram
-
-![newwwww](https://github.com/PrinsPardhi/Assignment/assets/73771547/5a076e3c-ca3d-414a-be6c-49b1fa463d33)
 
 ## Part 2
 
+## #SET A (Prins Pardhi)
 
-### Set B (Prins Pardhi)
-1.	Show schedule of all trips including main driver information for 10th October this year.
+Q.1 
+SELECT DISTINCT T.*
+FROM Train T
+JOIN Schedule S ON T.TrainID = S.TrainID
+JOIN Route R ON S.RouteID = R.RouteID
+JOIN MaintenanceSchedule MS ON T.TrainID = MS.TrainID
+WHERE 
+    (R.StartStationID = (SELECT StationID FROM Station WHERE StationName = 'Goa'))
+    AND
+    (R.EndStationID = (SELECT StationID FROM Station WHERE StationName = 'Mumbai'))
+    AND
+    (
+        R.StartStationID = (SELECT StationID FROM Station WHERE StationName = 'Ajmer')
+        AND
+        R.EndStationID = (SELECT StationID FROM Station WHERE StationName = 'Lonavala')
+    )
+    AND
+    (
+        MS.MaintenanceType = 'Routine'
+        AND
+        MS.LastMaintenanceDate <= '2023-11-30'
+        AND
+        (
+            SELECT COUNT(*) FROM MaintenanceSchedule
+            WHERE TrainID = T.TrainID AND MaintenanceType = 'Routine'
+            GROUP BY TrainID
+        ) >= T.TotalCoaches / 2
+    );
 
-![Screenshot 2023-11-17 125107](https://github.com/PrinsPardhi/Assignment/assets/73771547/4089fa2e-4036-495c-9acc-f58405c2899c)
 
 
+
+Q.2 
+ SELECT
+    R.RouteID,
+    R.StartStationID,
+    R.EndStationID,
+    R.Distance,
+    R.TimeTaken,
+    COUNT(B.BookingID) AS TotalSeatsSold,
+    SUM(CASE WHEN P.Age <= 12 THEN 1 ELSE 0 END) AS ChildrenSeats,
+    SUM(CASE WHEN P.Age > 12 AND P.Age <= 65 THEN 1 ELSE 0 END) AS AdultSeats,
+    SUM(CASE WHEN P.Age > 65 THEN 1 ELSE 0 END) AS SeniorCitizenSeats
+FROM
+    Route R
+JOIN
+    Schedule S ON R.RouteID = S.RouteID
+JOIN
+    Train T ON S.TrainID = T.TrainID
+JOIN
+    Booking B ON T.TrainID = B.TrainID
+JOIN
+    Passenger P ON B.PassengerID = P.PassengerID
+WHERE
+    MONTH(B.TravelDate) = 10 AND YEAR(B.TravelDate) = 2023
+GROUP BY
+    R.RouteID,
+    R.StartStationID,
+    R.EndStationID,
+    R.Distance,
+    R.TimeTaken
+ORDER BY
+    TotalSeatsSold DESC;
+
+![image](https://github.com/PrinsPardhi/Assignment/assets/73771547/d40c7911-4e16-48bc-b0b4-de1f74f99717)
+
+ 
+
+
+Q.3 
+SELECT
+    TA.TravelAgentID,
+    TA.AgentName,
+    TA.CommissionRate,
+    COUNT(B.BookingID) AS ConfirmedBookings
+FROM
+    TravelAgent TA
+JOIN
+    Booking B ON TA.TravelAgentID = B.TravelAgentID
+WHERE
+    MONTH(B.BookingDate) = 9 AND YEAR(B.BookingDate) = 2023
+GROUP BY
+    TA.TravelAgentID,
+    TA.AgentName,
+    TA.CommissionRate
+HAVING
+    ConfirmedBookings > 10
+ORDER BY
+    ConfirmedBookings DESC;
+
+
+
+Q.4
+   SELECT
+    R.RouteID,
+    R.StartStationID,
+    R.EndStationID,
+    R.Distance,
+    R.TimeTaken,
+    COUNT(P.PassengerID) AS SeniorCitizenTravels
+FROM
+    Route R
+JOIN
+    Schedule S ON R.RouteID = S.RouteID
+JOIN
+    Train T ON S.TrainID = T.TrainID
+JOIN
+    Booking B ON T.TrainID = B.TrainID
+JOIN
+    Passenger P ON B.PassengerID = P.PassengerID
+WHERE
+    P.Age > 65
+GROUP BY
+    R.RouteID,
+    R.StartStationID,
+    R.EndStationID,
+    R.Distance,
+    R.TimeTaken
+ORDER BY
+    SeniorCitizenTravels DESC
+LIMIT 1;
+
+
+
+Q.5 
+SELECT
+    R.RouteID,
+    R.StartStationID,
+    R.EndStationID,
+    R.Distance,
+    R.TimeTaken
+FROM
+    Route R
+WHERE
+    NOT EXISTS (
+        SELECT 1
+        FROM Schedule Sch
+        JOIN Train T ON Sch.TrainID = T.TrainID
+        LEFT JOIN LateArrivals LA ON T.TrainID = LA.TrainID
+        WHERE
+            Sch.RouteID = R.RouteID
+            AND LA.LateArrivalID IS NOT NULL
+    );
+
+![image](https://github.com/PrinsPardhi/Assignment/assets/73771547/4e7c5131-4ef2-4ccf-9771-f2851b54efe5)
+
+
+
+
+
+
+Thank You!!
