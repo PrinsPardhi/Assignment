@@ -1,11 +1,4 @@
 
-# CS 105 Persistent Data Management
-## Project Memebers :
-Prins Pardhi (22112035)
-
-Bhavik Sonule (22112002)
-
-Rhutuj Sasane (22112011)
 ## Part 1
 Part 1 of assignment, we will need to identify data requirements, perform normalization (up to 3NF), create MySQL tables, and insert sample data. Here's a step-by-step solution.
 
